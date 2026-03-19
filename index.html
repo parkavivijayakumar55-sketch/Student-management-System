@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Student Management System</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f3e5e5;
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+button{
+padding:8px 15px;
+background:green;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+table{
+margin:auto;
+margin-top:20px;
+width:60%;
+background:white;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+border:1px solid black;
+}
+
+th{
+background:lightblue;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Student Management System</h2>
+
+<h3>Add Student</h3>
+
+<input type="text" id="name" placeholder="Enter Name">
+<input type="text" id="roll" placeholder="Enter Roll Number">
+<input type="text" id="dept" placeholder="Enter Department">
+<input type="file" id="photo">
+
+<br><br>
+
+<button onclick="addStudent()">Add Student</button>
+
+<h3>Search Student</h3>
+
+<input type="text" id="search" placeholder="Search by name or roll" onkeyup="searchStudent()">
+
+<h3>Student List</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Photo</th>
+<th>Name</th>
+<th>Roll</th>
+<th>Department</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students")) || [];
+
+function addStudent(){
+
+let name=document.getElementById("name").value;
+let roll=document.getElementById("roll").value;
+let dept=document.getElementById("dept").value;
+let photoFile=document.getElementById("photo").files[0];
+
+if(name=="" || roll=="" || dept==""){
+alert("Fill all fields");
+return;
+}
+
+let reader = new FileReader();
+
+reader.onload=function(){
+
+let student={
+photo:reader.result,
+name:name,
+roll:roll,
+dept:dept
+};
+
+students.push(student);
+
+localStorage.setItem("students",JSON.stringify(students));
+
+displayStudents();
+
+};
+
+if(photoFile){
+reader.readAsDataURL(photoFile);
+}else{
+
+let student={
+photo:"",
+name:name,
+roll:roll,
+dept:dept
+};
+
+students.push(student);
+
+localStorage.setItem("students",JSON.stringify(students));
+
+displayStudents();
+
+}
+
+document.getElementById("name").value="";
+document.getElementById("roll").value="";
+document.getElementById("dept").value="";
+document.getElementById("photo").value="";
+
+}
+
+function displayStudents(){
+
+let table=document.getElementById("studentTable");
+
+table.innerHTML="";
+
+students.forEach((student,index)=>{
+
+table.innerHTML+=`
+
+<tr>
+
+<td><img src="${student.photo}" width="50"></td>
+
+<td>${student.name}</td>
+
+<td>${student.roll}</td>
+
+<td>${student.dept}</td>
+
+<td>
+
+<button onclick="deleteStudent(${index})">Delete</button>
+
+<button onclick="editStudent(${index})">Edit</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function deleteStudent(index){
+
+if(confirm("Delete this student?")){
+
+students.splice(index,1);
+
+localStorage.setItem("students",JSON.stringify(students));
+
+displayStudents();
+
+}
+
+}
+
+function editStudent(index){
+
+let student=students[index];
+
+document.getElementById("name").value=student.name;
+document.getElementById("roll").value=student.roll;
+document.getElementById("dept").value=student.dept;
+
+students.splice(index,1);
+
+localStorage.setItem("students",JSON.stringify(students));
+
+displayStudents();
+
+}
+
+function searchStudent(){
+
+let search=document.getElementById("search").value.toLowerCase();
+
+let table=document.getElementById("studentTable");
+
+table.innerHTML="";
+
+students.forEach((student,index)=>{
+
+if(student.name.toLowerCase().includes(search) || student.roll.toLowerCase().includes(search)){
+
+table.innerHTML+=`
+
+<tr>
+
+<td><img src="${student.photo}" width="50"></td>
+
+<td>${student.name}</td>
+
+<td>${student.roll}</td>
+
+<td>${student.dept}</td>
+
+<td>
+
+<button onclick="deleteStudent(${index})">Delete</button>
+
+<button onclick="editStudent(${index})">Edit</button>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+}
+
+displayStudents();
+
+</script>
+
+</body>
+</html>
